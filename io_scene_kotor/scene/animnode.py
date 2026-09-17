@@ -321,11 +321,25 @@ class AnimationNode:
             return subject.animation_data_create()
 
     @classmethod
+    def ensure_channelbag(cls, action, action_slot):
+        """Return the channelbag holding action_slot's F-curves, creating it if needed.
+
+        Slotted actions exist from Blender 4.4, but the anim_utils helper for
+        this only arrived in 5.0. Earlier versions get the same steps it takes:
+        the first layer, its first keyframe strip, then the slot's channelbag.
+        """
+        if hasattr(anim_utils, "action_ensure_channelbag_for_slot"):
+            return anim_utils.action_ensure_channelbag_for_slot(action, action_slot)
+        layer = action.layers[0] if action.layers else action.layers.new("Layer")
+        strip = layer.strips[0] if layer.strips else layer.strips.new(type="KEYFRAME")
+        return strip.channelbag(action_slot, ensure=True)
+
+    @classmethod
     def get_or_create_fcurve(cls, action, data_path, index, action_slot=None):
-        if bpy.app.version >= (5, 0) and action_slot:
-            channelbag = anim_utils.action_ensure_channelbag_for_slot(
-                action, action_slot
-            )
+        # From Blender 4.4 an object and its data can share one action in
+        # separate slots, and the legacy Action.fcurves only reaches the first.
+        if bpy.app.version >= (4, 4) and action_slot:
+            channelbag = cls.ensure_channelbag(action, action_slot)
             fcurve = channelbag.fcurves.find(data_path, index=index)
             if not fcurve:
                 fcurve = channelbag.fcurves.new(data_path=data_path, index=index)
@@ -397,15 +411,17 @@ class AnimationNode:
         cls, action, frame_start=0, frame_end=sys.maxsize, dp_prefix="", action_slot=None
     ):
         keyframes = dict()
-        if bpy.app.version >= (5, 0):
+        if bpy.app.version >= (4, 4) and action_slot:
+            # Read the bound slot only. The legacy Action.fcurves reaches just
+            # the first slot, which may belong to another ID sharing the action.
+            channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+            if not channelbag:
+                return keyframes
+            fcurves = channelbag.fcurves
+        elif bpy.app.version >= (5, 0):
             # Blender 5 removed Action.fcurves. An action with no slot bound
             # to this ID, such as a freshly created one, animates nothing.
-            if not action_slot:
-                return keyframes
-            channelbag = anim_utils.action_ensure_channelbag_for_slot(
-                action, action_slot
-            )
-            fcurves = channelbag.fcurves
+            return keyframes
         else:
             fcurves = action.fcurves
 

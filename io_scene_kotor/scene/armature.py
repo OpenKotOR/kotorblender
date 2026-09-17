@@ -19,7 +19,6 @@
 import sys
 
 import bpy
-from bpy_extras import anim_utils
 
 from mathutils import Quaternion, Vector
 
@@ -107,11 +106,8 @@ def apply_object_keyframes(mdl_root, armature):
         if not anim_data.action_slot:
             anim_data.action_slot = action_slot
 
-    if bpy.app.version >= (5, 0) and action_slot:
-        channelbag = anim_utils.action_ensure_channelbag_for_slot(
-            action, action_slot
-        )
-        channelbag.fcurves.clear()
+    if bpy.app.version >= (4, 4) and action_slot:
+        AnimationNode.ensure_channelbag(action, action_slot).fcurves.clear()
     else:
         action.fcurves.clear()
 
@@ -236,11 +232,8 @@ def unapply_object_keyframes_from_armature(obj, root_name, armature):
             if not anim_data.action_slot:
                 anim_data.action_slot = action_slot
 
-        if bpy.app.version >= (5, 0) and action_slot:
-            channelbag = anim_utils.action_ensure_channelbag_for_slot(
-                action, action_slot
-            )
-            channelbag.fcurves.clear()
+        if bpy.app.version >= (4, 4) and action_slot:
+            AnimationNode.ensure_channelbag(action, action_slot).fcurves.clear()
         else:
             action.fcurves.clear()
 
