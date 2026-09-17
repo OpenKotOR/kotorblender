@@ -476,6 +476,16 @@ class MdlReader:
                     if CTRL_LIGHT_COLOR in controllers
                     else [1.0] * 3
                 )
+                node.shadowradius = (
+                    controllers[CTRL_LIGHT_SHADOWRADIUS][0][1]
+                    if CTRL_LIGHT_SHADOWRADIUS in controllers
+                    else 0.0
+                )
+                node.verticaldisplacement = (
+                    controllers[CTRL_LIGHT_VERTICALDISPLACEMENT][0][1]
+                    if CTRL_LIGHT_VERTICALDISPLACEMENT in controllers
+                    else 0.0
+                )
             elif type_flags & NODE_EMITTER:
                 for val, key, dim in EMITTER_CONTROLLER_KEYS:
                     if val not in controllers:
@@ -756,6 +766,14 @@ class MdlReader:
                     if CTRL_LIGHT_COLOR in controllers:
                         node.keyframes["color"] = [
                             row for row in controllers[CTRL_LIGHT_COLOR]
+                        ]
+                    if CTRL_LIGHT_SHADOWRADIUS in controllers:
+                        node.keyframes["shadowradius"] = [
+                            row for row in controllers[CTRL_LIGHT_SHADOWRADIUS]
+                        ]
+                    if CTRL_LIGHT_VERTICALDISPLACEMENT in controllers:
+                        node.keyframes["verticaldisplacement"] = [
+                            row for row in controllers[CTRL_LIGHT_VERTICALDISPLACEMENT]
                         ]
                 if isinstance(supernode, EmitterNode):
                     for key in EMITTER_CONTROLLER_KEYS:

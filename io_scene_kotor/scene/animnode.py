@@ -130,6 +130,8 @@ PROPERTIES = [
     Property("color", "color", 3),
     Property("radius", "kb.radius", 1),
     Property("multiplier", "kb.multiplier", 1),
+    Property("shadowradius", "kb.shadowradius", 1),
+    Property("verticaldisplacement", "kb.verticaldisplacement", 1),
     # Emitters
     Property("alphastart", "kb.alphastart", 1),
     Property("alphamid", "kb.alphamid", 1),

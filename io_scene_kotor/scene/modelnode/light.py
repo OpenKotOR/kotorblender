@@ -47,6 +47,8 @@ class LightNode(BaseNode):
         self.fadinglight = 1
         self.lensflares = 0
         self.flareradius = 1.0
+        self.shadowradius = 0.0
+        self.verticaldisplacement = 0.0
 
         self.flare_list = FlareList()
 
@@ -79,6 +81,8 @@ class LightNode(BaseNode):
         obj.kb.dynamictype = self.dynamictype
         obj.kb.affectdynamic = self.affectdynamic >= 1
         obj.kb.flareradius = self.flareradius
+        obj.kb.shadowradius = self.shadowradius
+        obj.kb.verticaldisplacement = self.verticaldisplacement
         obj.kb.negativelight = any([c < 0.0 for c in self.color])
 
         if (self.flareradius > 0) or (self.lensflares >= 1):
@@ -106,6 +110,8 @@ class LightNode(BaseNode):
         self.dynamictype = obj.kb.dynamictype
         self.affectdynamic = 1 if obj.kb.affectdynamic else 0
         self.flareradius = obj.kb.flareradius
+        self.shadowradius = obj.kb.shadowradius
+        self.verticaldisplacement = obj.kb.verticaldisplacement
         self.negativelight = 1 if obj.kb.negativelight else 0
 
         if obj.kb.lensflares:

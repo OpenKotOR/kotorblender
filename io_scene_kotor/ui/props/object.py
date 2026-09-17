@@ -233,6 +233,8 @@ class ObjectPropertyGroup(bpy.types.PropertyGroup):
     negativelight: bpy.props.BoolProperty(
         name="Negative Light", update=on_update_light_power
     )
+    shadowradius: bpy.props.FloatProperty(name="Shadow Radius")
+    verticaldisplacement: bpy.props.FloatProperty(name="Vertical Displacement")
 
     # Emitter
     alphaend: bpy.props.FloatProperty(name="Alpha End", default=1.0, min=0.0, max=1.0)

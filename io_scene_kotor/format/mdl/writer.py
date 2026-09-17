@@ -605,6 +605,21 @@ class MdlWriter:
                 out_data.append(val)
             data_count += 4
 
+            # Almost no retail light carries these two, so they are only
+            # written when set, leaving other lights byte-identical.
+            for ctrl_type, value in [
+                (CTRL_LIGHT_SHADOWRADIUS, node.shadowradius),
+                (CTRL_LIGHT_VERTICALDISPLACEMENT, node.verticaldisplacement),
+            ]:
+                if value == 0.0:
+                    continue
+                out_keys.append(
+                    ControllerKey(ctrl_type, 1, data_count, data_count + 1, 1)
+                )
+                out_data.append(0.0)  # timekey
+                out_data.append(value)
+                data_count += 2
+
         # Emitter Controllers
 
         if type_flags & NODE_EMITTER:
@@ -723,6 +738,12 @@ class MdlWriter:
                 "multiplier", CTRL_LIGHT_MULTIPLIER, 1, data_count
             )
             data_count = append_keyframes("color", CTRL_LIGHT_COLOR, 3, data_count)
+            data_count = append_keyframes(
+                "shadowradius", CTRL_LIGHT_SHADOWRADIUS, 1, data_count
+            )
+            data_count = append_keyframes(
+                "verticaldisplacement", CTRL_LIGHT_VERTICALDISPLACEMENT, 1, data_count
+            )
 
         # Emitter Controllers
 
