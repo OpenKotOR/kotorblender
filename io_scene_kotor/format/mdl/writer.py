@@ -266,7 +266,9 @@ class MdlWriter:
                 # Controllers
                 ctrl_keys = []
                 ctrl_data = []
-                self.peek_anim_controllers(node, type_flags, ctrl_keys, ctrl_data)
+                self.peek_anim_controllers(
+                    node, model_node, type_flags, ctrl_keys, ctrl_data
+                )
                 ctrl_count = len(ctrl_keys)
                 ctrl_data_count = len(ctrl_data)
                 self.anim_controller_keys[anim_idx].append(ctrl_keys)
@@ -627,6 +629,9 @@ class MdlWriter:
                 value = getattr(node, key, None)
                 if value is None:
                     continue
+                # Retail emitters never carry a zero detonate controller.
+                if key == "detonate" and value == 0.0:
+                    continue
                 out_keys.append(
                     ControllerKey(ctrl_val, 1, data_count, data_count + 1, dim)
                 )
@@ -638,7 +643,7 @@ class MdlWriter:
                         out_data.append(val)
                 data_count += 1 + dim
 
-    def peek_anim_controllers(self, node, type_flags, out_keys, out_data):
+    def peek_anim_controllers(self, node, model_node, type_flags, out_keys, out_data):
         def append_keyframes(key, ctrl_type, dim, data_count):
             if not key in node.keyframes:
                 return data_count
@@ -749,6 +754,11 @@ class MdlWriter:
 
         if type_flags & NODE_EMITTER:
             for ctrl_type, key, dim in EMITTER_CONTROLLER_KEYS:
+                # The engine only allocates detonate storage for Explosion
+                # emitters, and reads past the end of the controller data on
+                # any other type. The update type lives on the model node.
+                if key == "detonate" and model_node.update != "Explosion":
+                    continue
                 data_count = append_keyframes(key, ctrl_type, dim, data_count)
 
     def save_file_header(self):

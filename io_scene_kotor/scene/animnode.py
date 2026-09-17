@@ -180,6 +180,7 @@ PROPERTIES = [
     Property("colorstart", "kb.colorstart", 3),
     Property("colormid", "kb.colormid", 3),
     Property("colorend", "kb.colorend", 3),
+    Property("detonate", "kb.detonate", 1),
 ]
 
 LABEL_TO_PROPERTY = {prop.label: prop for prop in PROPERTIES}
