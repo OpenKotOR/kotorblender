@@ -53,9 +53,8 @@ def get_or_create_text(name):
 
 
 class RenderMinimapOperator(Operator):
-    def __init__(self, reset_render=False, hide_untextured=False):
-        self.reset_render = reset_render
-        self.hide_untextured = hide_untextured
+    reset_render = False
+    hide_untextured = False
 
     def execute(self, context):
         aabbs = [obj for obj in context.scene.objects if is_aabb_mesh(obj)]
@@ -181,9 +180,8 @@ class KB_OT_render_minimap_auto(RenderMinimapOperator):
     bl_label = "Render Minimap (auto)"
     bl_description = "Render scene to an image, hiding untextures meshes and resetting render properties"
 
-    def __init__(self):
-        self.reset_render = True
-        self.hide_untextured = True
+    reset_render = True
+    hide_untextured = True
 
 
 class KB_OT_render_minimap_manual(RenderMinimapOperator):
@@ -191,6 +189,5 @@ class KB_OT_render_minimap_manual(RenderMinimapOperator):
     bl_label = "Render Minimap (manual)"
     bl_description = "Render scene to an image, user is responsible for setting render properties and object visibility"
 
-    def __init__(self):
-        self.reset_render = False
-        self.hide_untextured = False
+    reset_render = False
+    hide_untextured = False
