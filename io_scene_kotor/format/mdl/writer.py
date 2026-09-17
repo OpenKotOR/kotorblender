@@ -28,6 +28,22 @@ from ..binwriter import BinaryWriter
 from .types import *
 
 
+def fixed_string(val, size, field):
+    """Pad val with NUL characters to fill a fixed-width field of size bytes.
+
+    Raises RuntimeError when val contains non-ASCII characters or is longer
+    than the field. Either would push every field written after it out of
+    place and leave a file that no longer loads.
+    """
+    if not val.isascii():
+        raise RuntimeError("{} '{}' contains non-ASCII characters".format(field, val))
+    if len(val) > size:
+        raise RuntimeError(
+            "{} '{}' is longer than {} characters".format(field, val, size)
+        )
+    return val.ljust(size, "\0")
+
+
 class MdlWriter:
     def __init__(self, path, model, tsl, xbox, compress_quaternions=False):
         self.path = path
@@ -204,6 +220,10 @@ class MdlWriter:
 
     def peek_node_names(self):
         for node in self.nodes:
+            if not node.name.isascii():
+                raise RuntimeError(
+                    "Node name '{}' contains non-ASCII characters".format(node.name)
+                )
             self.name_offsets.append(self.mdl_pos)
             self.mdl_pos += len(node.name) + 1
 
@@ -716,7 +736,7 @@ class MdlWriter:
                 fn_ptr1 = MODEL_FN_PTR_1_K1_PC
                 fn_ptr2 = MODEL_FN_PTR_2_K1_PC
 
-        model_name = self.model.name.ljust(32, "\0")
+        model_name = fixed_string(self.model.name, 32, "Model name")
         off_root_node = self.node_offsets[0]
         total_num_nodes = len(self.nodes)
         ref_count = 0
@@ -749,7 +769,7 @@ class MdlWriter:
         bounding_box = [-5.0, -5.0, -1.0, 5.0, 5.0, 10.0]
         radius = 7.0  # TODO
         scale = self.model.animscale
-        supermodel_name = self.model.supermodel.ljust(32, "\0")
+        supermodel_name = fixed_string(self.model.supermodel, 32, "Supermodel name")
 
         if (
             is_not_null(self.model.animroot)
@@ -810,12 +830,12 @@ class MdlWriter:
                     fn_ptr1 = ANIM_FN_PTR_1_K1_PC
                     fn_ptr2 = ANIM_FN_PTR_2_K1_PC
 
-            name = anim.name.ljust(32, "\0")
+            name = fixed_string(anim.name, 32, "Animation name")
             off_root_node = self.anim_node_offsets[anim_idx][0]
             total_num_nodes = len(self.anim_nodes[anim_idx])
             ref_count = 0
             model_type = MODEL_ANIM
-            anim_root = anim.animroot.ljust(32, "\0")
+            anim_root = fixed_string(anim.animroot, 32, "Animation root")
 
             self.mdl.write_uint32(fn_ptr1)
             self.mdl.write_uint32(fn_ptr2)
@@ -836,7 +856,7 @@ class MdlWriter:
 
             for time, event in anim.events:
                 self.mdl.write_float(time)
-                self.mdl.write_string(event.ljust(32, "\0"))
+                self.mdl.write_string(fixed_string(event, 32, "Animation event"))
 
             self.save_anim_nodes(anim_idx)
 
@@ -1005,15 +1025,15 @@ class MdlWriter:
             # Emitter Header
 
             if type_flags & NODE_EMITTER:
-                update = node.update.ljust(32, "\0")
-                render = node.emitter_render.ljust(32, "\0")
-                blend = node.blend.ljust(32, "\0")
-                texture = node.texture.ljust(32, "\0")
-                chunk_name = node.chunk_name.ljust(16, "\0")
+                update = fixed_string(node.update, 32, "Emitter update")
+                render = fixed_string(node.emitter_render, 32, "Emitter render")
+                blend = fixed_string(node.blend, 32, "Emitter blend")
+                texture = fixed_string(node.texture, 32, "Emitter texture")
+                chunk_name = fixed_string(node.chunk_name, 16, "Emitter chunk name")
                 twosided_tex = 1 if node.twosidedtex else 0
                 loop = 1 if node.loop else 0
                 frame_blending = 1 if node.frame_blending else 0
-                depth_texture_name = node.depth_texture_name.ljust(32, "\0")
+                depth_texture_name = fixed_string(node.depth_texture_name, 32, "Emitter depth texture")
 
                 flags = 0
                 if node.p2p:
@@ -1067,7 +1087,7 @@ class MdlWriter:
             # Reference Header
 
             if type_flags & NODE_REFERENCE:
-                ref_model = node.refmodel.ljust(32, "\0")
+                ref_model = fixed_string(node.refmodel, 32, "Reference model")
                 reattachable = node.reattachable
 
                 self.mdl.write_string(ref_model)
@@ -1084,8 +1104,8 @@ class MdlWriter:
                 diffuse = node.diffuse
                 ambient = node.ambient
                 transparency_hint = node.transparencyhint
-                bitmap = node.bitmap.ljust(32, "\0")
-                bitmap2 = node.bitmap2.ljust(32, "\0")
+                bitmap = fixed_string(node.bitmap, 32, "Diffuse texture")
+                bitmap2 = fixed_string(node.bitmap2, 32, "Lightmap texture")
                 bitmap3 = "".ljust(12, "\0")
                 bitmap4 = "".ljust(12, "\0")
                 animate_uv = node.animateuv
