@@ -65,6 +65,14 @@ class BaseNode:
             )
         self.orientation = eval_obj.rotation_quaternion
         self.scale = eval_obj.scale[0]
+        if eval_obj.matrix_parent_inverse != Matrix.Identity(4):
+            # Parenting with Ctrl+P keeps a child in place by storing a parent
+            # inverse, which location and rotation_quaternion leave out. MDL
+            # nodes have no such matrix, so bake it into the node transform.
+            position, orientation, scale = eval_obj.matrix_local.decompose()
+            self.position = position
+            self.orientation = orientation
+            self.scale = scale[0]
 
         self.from_root = eval_obj.matrix_local
         if self.parent:

@@ -20,6 +20,7 @@ import sys
 
 import bpy
 from bpy_extras import anim_utils
+from mathutils import Matrix, Quaternion, Vector
 
 from ..constants import NodeType, ANIM_REST_POSE_OFFSET
 from ..utils import time_to_frame, frame_to_time, is_close
@@ -62,6 +63,34 @@ def convert_mdl_orientation_to_bl_rotation(val, restloc, animscale):
 
 def convert_bl_rotation_to_mdl_orientation(val, restloc):
     return [*val[1:4], val[0]]
+
+
+def apply_parent_inverse(label, values, parent_inverse):
+    """Map exported key values for label through an object's parent inverse.
+
+    Consumes MDL-ordered values for one keyframe, Bezier tangents included, and
+    returns them in the parent's space. Position keys are offsets from the rest
+    position, so they take only the rotation and scale of the inverse. Values
+    for any other label are returned unchanged.
+    """
+    _, rotation, scale = parent_inverse.decompose()
+    if label == "position":
+        linear = parent_inverse.to_3x3()
+        return [
+            val
+            for i in range(0, len(values), 3)
+            for val in linear @ Vector(values[i : i + 3])
+        ]
+    if label == "orientation":
+        mapped = []
+        for i in range(0, len(values), 4):
+            x, y, z, w = values[i : i + 4]
+            q = rotation @ Quaternion((w, x, y, z))
+            mapped += [q.x, q.y, q.z, q.w]
+        return mapped
+    if label == "scale":
+        return [val * scale[0] for val in values]
+    return values
 
 
 def convert_mdl_scale_to_bl_scale(val, restloc, animscale):
@@ -323,6 +352,12 @@ class AnimationNode:
         )
         nested_keyframes = self.nest_keyframes(keyframes)
 
+        # Keys hold basis values; the node transform exported alongside them
+        # already includes any parent inverse, so map the keys the same way.
+        parent_inverse = getattr(anim_subject, "matrix_parent_inverse", None)
+        if parent_inverse == Matrix.Identity(4):
+            parent_inverse = None
+
         for data_path, dp_keyframes in nested_keyframes.items():
             if not data_path in DATA_PATH_TO_PROPERTY:
                 continue
@@ -351,6 +386,8 @@ class AnimationNode:
                             p0[i] -= p1[i]
                             p2[i] -= p1[i]
                         values = p1 + p0 + p2
+                if parent_inverse is not None:
+                    values = apply_parent_inverse(label, values, parent_inverse)
                 self.keyframes[label].append([time] + values)
 
     @classmethod
