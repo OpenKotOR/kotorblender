@@ -31,15 +31,16 @@ from .types import *
 def fixed_string(val, size, field):
     """Pad val with NUL characters to fill a fixed-width field of size bytes.
 
-    Raises RuntimeError when val contains non-ASCII characters or is longer
-    than the field. Either would push every field written after it out of
-    place and leave a file that no longer loads.
+    Raises RuntimeError when val contains non-ASCII characters or leaves no
+    room for the NUL terminator the engine reads the field up to. Either would
+    push every field written after it out of place or run the string into the
+    next field.
     """
     if not val.isascii():
         raise RuntimeError("{} '{}' contains non-ASCII characters".format(field, val))
-    if len(val) > size:
+    if len(val) >= size:
         raise RuntimeError(
-            "{} '{}' is longer than {} characters".format(field, val, size)
+            "{} '{}' is longer than {} characters".format(field, val, size - 1)
         )
     return val.ljust(size, "\0")
 
