@@ -109,6 +109,17 @@ Fine-tuning:
 1. Create/move path points, or modify path connections via Object Properties
 1. Export PTH via File → Export → KotOR Path (.pth)
 
+## Credits
+
+KotorBlender builds on the work of several authors:
+
+- **NeverBlender** by Symmetric. KotORBlender was forked from version 1.23a.
+- **KotORBlender 1.01** by Purifier and Ndix UR.
+- **KotorBlender** by seedhartha, who upgraded it to Blender 2.80 and later and developed it up to version 4.0.3.
+- **OpenKotOR**, who maintain this version of KotorBlender today.
+
+Other contributors are listed in the [commit history](https://github.com/OpenKotOR/kotorblender/commits/master).
+
 ## License
 
 [GPL 3.0 or later](LICENSE)
