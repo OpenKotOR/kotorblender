@@ -14,7 +14,7 @@ Significant changes have been introduced since KotORBlender 1.01, including, but
 
 ## Compatibility
 
-Current version of KotorBlender is fully compatible with Blender versions 3.6, 4.2, and 5.0. Blender development moves fast and is known to introduce breaking changes, therefore compatibility with any other version of Blender is not guaranteed.
+Current version of KotorBlender is fully compatible with the Blender LTS releases 3.6, 4.2, 4.5, and 5.2. Blender development moves fast and is known to introduce breaking changes, therefore compatibility with any other version of Blender, including non-LTS releases, is not guaranteed.
 
 ## Installation
 
@@ -26,10 +26,10 @@ Current version of KotorBlender is fully compatible with Blender versions 3.6, 4
 ### From GitHub
 
 1. Clone [GitHub repository](https://github.com/seedhartha/kotorblender)
-1. When using Blender 4.2+ (including 5.0), create a symlink to **io_scene_kotor** directory in current user's Blender extensions directory:
+1. When using Blender 4.2, 4.5, or 5.2, create a symlink to **io_scene_kotor** directory in current user's Blender extensions directory:
     1. Set cloned repository as current directory
-    1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\5.0\extensions\user_default\io_scene_kotor" "%CD%/io_scene_kotor"` (adjust version number as needed)
-    1. Create a symlink on Linux: `ln -s $(pwd)/io_scene_kotor ~/.config/blender/5.0/extensions/user_default/io_scene_kotor` (adjust version number as needed)
+    1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\5.2\extensions\user_default\io_scene_kotor" "%CD%/io_scene_kotor"` (adjust version number as needed)
+    1. Create a symlink on Linux: `ln -s $(pwd)/io_scene_kotor ~/.config/blender/5.2/extensions/user_default/io_scene_kotor` (adjust version number as needed)
 1. When using Blender 3.6, create a symlink to **io_scene_kotor** directory in current user's Blender addons directory:
     1. Set cloned repository as current directory
     1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\3.6\scripts\addons\io_scene_kotor" "%CD%/io_scene_kotor"`
