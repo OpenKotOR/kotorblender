@@ -165,12 +165,13 @@ class BwmWriter:
                 self.old_to_new_vert_idx[vert_idx] = num_verts
                 self.verts.append(vert)
 
-        # Offset by node and LYT position
+        # BWM vertices carry no node transform, so bake in the chain the MDL
+        # applies to the render mesh. Otherwise a rotated, scaled or nested
+        # walkmesh object drifts away from its model in-game.
+        from_root = self.geom_node.from_root
+        lytposition = Vector(self.geom_node.lytposition)
         for vert_idx, vert in enumerate(self.verts):
-            self.verts[vert_idx] = [
-                vert[i] + self.geom_node.position[i] + self.geom_node.lytposition[i]
-                for i in range(3)
-            ]
+            self.verts[vert_idx] = [*(from_root @ Vector(vert) + lytposition)]
 
     def peek_faces(self):
         walkable_face_indices = []
@@ -183,6 +184,7 @@ class BwmWriter:
                 walkable_face_indices.append(face_idx)
                 self.num_walkable_faces += 1
         face_indices = walkable_face_indices + non_walkable_face_indices
+        normal_matrix = self.geom_node.from_root.to_3x3().inverted_safe().transposed()
         for face_idx in face_indices:
             self.facelist.vertices.append(
                 [
@@ -191,7 +193,8 @@ class BwmWriter:
                 ]
             )
             self.facelist.materials.append(self.geom_node.facelist.materials[face_idx])
-            self.facelist.normals.append(self.geom_node.facelist.normals[face_idx])
+            normal = normal_matrix @ Vector(self.geom_node.facelist.normals[face_idx])
+            self.facelist.normals.append([*normal.normalized()])
 
     def peek_aabbs(self):
         if self.bwm_type == BWM_TYPE_PWK_DWK:

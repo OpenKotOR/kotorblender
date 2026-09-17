@@ -452,6 +452,9 @@ class MdlReader:
                     if CTRL_MESH_SCALE in controllers
                     else 1.0
                 )
+                # Walkmesh export bakes object scale into BWM vertices, so the
+                # LYT offset derived from from_root has to include it too.
+                node.from_root = node.from_root @ Matrix.Scale(node.scale, 4)
                 node.selfillumcolor = (
                     controllers[CTRL_MESH_SELFILLUMCOLOR][0][1:]
                     if CTRL_MESH_SELFILLUMCOLOR in controllers
