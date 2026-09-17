@@ -441,20 +441,20 @@ class MdlReader:
 
         if controller_arr.count > 0:
             controllers = self.load_controllers(controller_arr, controller_data_arr)
+            node.scale = (
+                controllers[CTRL_BASE_SCALE][0][1]
+                if CTRL_BASE_SCALE in controllers
+                else 1.0
+            )
+            # Walkmesh export bakes object scale into BWM vertices, so the
+            # LYT offset derived from from_root has to include it too.
+            node.from_root = node.from_root @ Matrix.Scale(node.scale, 4)
             if type_flags & NODE_MESH:
                 node.alpha = (
                     controllers[CTRL_MESH_ALPHA][0][1]
                     if CTRL_MESH_ALPHA in controllers
                     else 1.0
                 )
-                node.scale = (
-                    controllers[CTRL_MESH_SCALE][0][1]
-                    if CTRL_MESH_SCALE in controllers
-                    else 1.0
-                )
-                # Walkmesh export bakes object scale into BWM vertices, so the
-                # LYT offset derived from from_root has to include it too.
-                node.from_root = node.from_root @ Matrix.Scale(node.scale, 4)
                 node.selfillumcolor = (
                     controllers[CTRL_MESH_SELFILLUMCOLOR][0][1:]
                     if CTRL_MESH_SELFILLUMCOLOR in controllers
@@ -731,14 +731,14 @@ class MdlReader:
                         [row[0]] + orientations[i]
                         for i, row in enumerate(controllers[CTRL_BASE_ORIENTATION])
                     ]
+                if CTRL_BASE_SCALE in controllers:
+                    node.keyframes["scale"] = [
+                        row for row in controllers[CTRL_BASE_SCALE]
+                    ]
                 if isinstance(supernode, TrimeshNode):
                     if CTRL_MESH_ALPHA in controllers:
                         node.keyframes["alpha"] = [
                             row for row in controllers[CTRL_MESH_ALPHA]
-                        ]
-                    if CTRL_MESH_SCALE in controllers:
-                        node.keyframes["scale"] = [
-                            row for row in controllers[CTRL_MESH_SCALE]
                         ]
                     if CTRL_MESH_SELFILLUMCOLOR in controllers:
                         node.keyframes["selfillumcolor"] = [

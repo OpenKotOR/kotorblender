@@ -543,6 +543,16 @@ class MdlWriter:
         out_data.append(node.orientation[0])
         data_count += 5
 
+        # Meshes always carry a scale controller. Other node types only need
+        # one when scaled, and retail models without one read as 1.0.
+        if not type_flags & NODE_MESH and node.scale != 1.0:
+            out_keys.append(
+                ControllerKey(CTRL_BASE_SCALE, 1, data_count, data_count + 1, 1)
+            )
+            out_data.append(0.0)  # timekey
+            out_data.append(node.scale)
+            data_count += 2
+
         # Mesh Controllers
 
         if type_flags & NODE_MESH:
@@ -554,7 +564,7 @@ class MdlWriter:
             data_count += 2
 
             out_keys.append(
-                ControllerKey(CTRL_MESH_SCALE, 1, data_count, data_count + 1, 1)
+                ControllerKey(CTRL_BASE_SCALE, 1, data_count, data_count + 1, 1)
             )
             out_data.append(0.0)  # timekey
             out_data.append(node.scale)
@@ -691,12 +701,16 @@ class MdlWriter:
 
         data_count = append_keyframes("position", CTRL_BASE_POSITION, 3, data_count)
         data_count = append_orientation_keyframes(data_count)
+        # Mesh scale keys stay after alpha below, where meshes have always
+        # written them.
+        if not type_flags & NODE_MESH:
+            data_count = append_keyframes("scale", CTRL_BASE_SCALE, 1, data_count)
 
         # Mesh Controllers
 
         if type_flags & NODE_MESH:
             data_count = append_keyframes("alpha", CTRL_MESH_ALPHA, 1, data_count)
-            data_count = append_keyframes("scale", CTRL_MESH_SCALE, 1, data_count)
+            data_count = append_keyframes("scale", CTRL_BASE_SCALE, 1, data_count)
             data_count = append_keyframes(
                 "selfillumcolor", CTRL_MESH_SELFILLUMCOLOR, 3, data_count
             )
