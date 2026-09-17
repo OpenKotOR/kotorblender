@@ -27,6 +27,9 @@ class BinaryWriter:
     def __del__(self):
         self.file.close()
 
+    def close(self):
+        self.file.close()
+
     def tell(self):
         return self.tell()
 

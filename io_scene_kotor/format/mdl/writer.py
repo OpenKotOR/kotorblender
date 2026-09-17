@@ -31,11 +31,10 @@ from .types import *
 class MdlWriter:
     def __init__(self, path, model, tsl, xbox, compress_quaternions=False):
         self.path = path
-        self.mdl = BinaryWriter(path, "little")
-
         basepath, _ = os.path.splitext(path)
-        mdx_path = basepath + ".mdx"
-        self.mdx = BinaryWriter(mdx_path, "little")
+        self.mdx_path = basepath + ".mdx"
+        self.mdl = None
+        self.mdx = None
 
         self.model = model
         self.tsl = tsl
@@ -126,12 +125,30 @@ class MdlWriter:
     def save(self):
         self.peek_model()
 
-        self.save_file_header()
-        self.save_geometry_header()
-        self.save_model_header()
-        self.save_names()
-        self.save_animations()
-        self.save_nodes()
+        # Opening the target paths truncates them, so an exception partway
+        # through would destroy the previous MDL/MDX. Write beside them and
+        # swap in only once both files are complete.
+        mdl_tmp = self.path + ".tmp"
+        mdx_tmp = self.mdx_path + ".tmp"
+        self.mdl = BinaryWriter(mdl_tmp, "little")
+        self.mdx = BinaryWriter(mdx_tmp, "little")
+        try:
+            self.save_file_header()
+            self.save_geometry_header()
+            self.save_model_header()
+            self.save_names()
+            self.save_animations()
+            self.save_nodes()
+        except BaseException:
+            self.mdl.close()
+            self.mdx.close()
+            os.remove(mdl_tmp)
+            os.remove(mdx_tmp)
+            raise
+        self.mdl.close()
+        self.mdx.close()
+        os.replace(mdl_tmp, self.path)
+        os.replace(mdx_tmp, self.mdx_path)
 
     def peek_model(self):
         self.mdl_pos = 80 + 116  # geometry header + model header
