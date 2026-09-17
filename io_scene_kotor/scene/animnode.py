@@ -358,7 +358,11 @@ class AnimationNode:
         cls, action, frame_start=0, frame_end=sys.maxsize, dp_prefix="", action_slot=None
     ):
         keyframes = dict()
-        if bpy.app.version >= (5, 0) and action_slot:
+        if bpy.app.version >= (5, 0):
+            # Blender 5 removed Action.fcurves. An action with no slot bound
+            # to this ID, such as a freshly created one, animates nothing.
+            if not action_slot:
+                return keyframes
             channelbag = anim_utils.action_ensure_channelbag_for_slot(
                 action, action_slot
             )
