@@ -74,6 +74,7 @@ class BaseNode:
         if test(self):
             return self
         for child in self.children:
-            if test(child):
-                return child
+            found = child.find_node(test)
+            if found:
+                return found
         return None
