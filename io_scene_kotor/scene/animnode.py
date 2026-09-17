@@ -275,10 +275,12 @@ class AnimationNode:
 
     @classmethod
     def get_or_create_action_slot(cls, action, id_type, name):
-        if name in action.slots:
-            return action.slots[name]
-        else:
-            return action.slots.new(id_type=id_type, name=name)
+        # action.slots is keyed by identifier, which prefixes the ID type
+        # ("OBHead_g"), so a lookup by bare name never matches.
+        for slot in action.slots:
+            if slot.name_display == name and slot.target_id_type == id_type:
+                return slot
+        return action.slots.new(id_type=id_type, name=name)
 
     @classmethod
     def get_or_create_animation_data(cls, subject):
