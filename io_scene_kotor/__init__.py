@@ -109,7 +109,7 @@ from .ui.props.scene import ScenePropertyGroup
 
 bl_info = {
     "name": "KotorBlender",
-    "author": "seedhartha",
+    "author": "Symmetric & Purifier & Ndix UR & seedhartha & OpenKotOR",
     "version": (4, 0, 8),
     "blender": (3, 6),
     "location": "File > Import-Export, Object Properties",

@@ -4,7 +4,7 @@ id = "io_scene_kotor"
 version = "4.0.8"
 name = "KotorBlender"
 tagline = "Import, edit and export KotOR models"
-maintainer = "seedhartha <seedhartha.github@gmail.com>"
+maintainer = "OpenKotOR"
 type = "add-on"
 
 blender_version_min = "3.6.0"
