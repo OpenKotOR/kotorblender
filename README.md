@@ -18,14 +18,15 @@ Current version of KotorBlender is fully compatible with the Blender LTS release
 
 ## Installation
 
-### From DeadlyStream
+### From GitHub Releases
 
-1. Download latest release of KotorBlender from [Deadly Stream](https://deadlystream.com/files/file/1853-kotorblender-for-blender-293/)
-1. Install extension from disk as described in [Blender documentation](https://docs.blender.org/manual/en/4.2/editors/preferences/extensions.html#bpy-ops-extensions-package-install-files)
+1. Open the [latest release](https://github.com/OpenKotOR/kotorblender/releases/latest)
+1. When using Blender 4.2, 4.5, or 5.2, download **io_scene_kotor-*version*.zip** and install it from disk as described in the [Blender documentation](https://docs.blender.org/manual/en/4.2/editors/preferences/extensions.html#bpy-ops-extensions-package-install-files)
+1. When using Blender 3.6, download **io_scene_kotor-*version*-blender-3.6.zip** and install it via Edit → Preferences → Add-ons → Install
 
-### From GitHub
+### From Source
 
-1. Clone [GitHub repository](https://github.com/seedhartha/kotorblender)
+1. Clone [GitHub repository](https://github.com/OpenKotOR/kotorblender)
 1. When using Blender 4.2, 4.5, or 5.2, create a symlink to **io_scene_kotor** directory in current user's Blender extensions directory:
     1. Set cloned repository as current directory
     1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\5.2\extensions\user_default\io_scene_kotor" "%CD%/io_scene_kotor"` (adjust version number as needed)
@@ -34,6 +35,10 @@ Current version of KotorBlender is fully compatible with the Blender LTS release
     1. Set cloned repository as current directory
     1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\3.6\scripts\addons\io_scene_kotor" "%CD%/io_scene_kotor"`
     1. Create a symlink on Linux: `ln -s $(pwd)/io_scene_kotor ~/.config/blender/3.6/scripts/addons/io_scene_kotor`
+
+### Original Releases
+
+The original KotorBlender releases by seedhartha remain available on [Deadly Stream](https://deadlystream.com/files/file/1853-kotorblender-for-blender-293/). They are published separately from the releases in this repository.
 
 ## Usage
 
