@@ -1340,13 +1340,14 @@ class MdlWriter:
             # Skin Header
 
             if type_flags & NODE_SKIN:
-                bone_names = set()
+                # Keyed by bone name to keep first seen order: a set iterates
+                # in hash order, which differs between runs and would renumber
+                # every bone index written to the MDX.
+                bone_names = dict()
                 for vert_weights in node.weights:
                     for bone_name, _ in vert_weights:
-                        bone_names.add(bone_name)
-                bone_indices = []
-                for bone_name in bone_names:
-                    bone_indices.append(self.node_idx_by_name[bone_name])
+                        bone_names[bone_name] = None
+                bone_indices = [self.node_idx_by_name[name] for name in bone_names]
                 bonemap = [-1] * len(self.nodes)
                 for bone_idx, bone_node_idx in enumerate(bone_indices):
                     bonemap[bone_node_idx] = bone_idx
