@@ -18,9 +18,10 @@
 
 """Blender API differences across the supported releases.
 
-The supported Blender releases differ in how actions, mesh normals, lights and
-materials are addressed. Every version check lives here, so the rest of the
-add-on calls these helpers and the supported range stays readable in one file.
+KotorBlender supports the Blender LTS releases 2.83, 2.93, 3.3, 3.6, 4.2, 4.5
+and 5.2, which differ in how actions, mesh normals, lights and materials are
+addressed. Every version check lives here, so the rest of the add-on calls
+these helpers and the supported range stays readable in one file.
 """
 
 import bpy
@@ -94,7 +95,13 @@ def find_fcurves(action, action_slot=None):
 
 def clear_fcurves(action, action_slot=None):
     """Remove the F-curves action_slot owns, or all of them before slots."""
-    ensure_fcurves(action, action_slot).clear()
+    fcurves = ensure_fcurves(action, action_slot)
+    if hasattr(fcurves, "clear"):
+        fcurves.clear()
+        return
+    # Action.fcurves gained clear() in Blender 3.0.
+    for fcurve in list(fcurves):
+        fcurves.remove(fcurve)
 
 
 def _ensure_channelbag(action, action_slot):

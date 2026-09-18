@@ -111,7 +111,7 @@ bl_info = {
     "name": "KotorBlender",
     "author": "Symmetric & Purifier & Ndix UR & seedhartha & OpenKotOR",
     "version": (4, 0, 8),
-    "blender": (3, 6),
+    "blender": (2, 83),
     "location": "File > Import-Export, Object Properties",
     "description": "Import, edit and export KotOR models",
     "category": "Import-Export",

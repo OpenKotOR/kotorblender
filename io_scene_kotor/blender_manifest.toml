@@ -7,7 +7,7 @@ tagline = "Import, edit and export KotOR models"
 maintainer = "OpenKotOR"
 type = "add-on"
 
-blender_version_min = "3.6.0"
+blender_version_min = "2.83.0"
 
 license = [
   "SPDX:GPL-3.0-or-later",

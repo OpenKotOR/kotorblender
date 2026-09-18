@@ -14,27 +14,42 @@ Significant changes have been introduced since KotORBlender 1.01, including, but
 
 ## Compatibility
 
-Current version of KotorBlender is fully compatible with the Blender LTS releases 3.6, 4.2, 4.5, and 5.2. Blender development moves fast and is known to introduce breaking changes, therefore compatibility with any other version of Blender, including non-LTS releases, is not guaranteed.
+Current version of KotorBlender is tested against the following Blender LTS releases. Blender 4.2 introduced extensions, and earlier releases install KotorBlender as an add-on instead.
+
+| Blender LTS | Installs as |
+|---|---|
+| 5.2 | Extension |
+| 4.5 | Extension |
+| 4.2 | Extension |
+| 3.6 | Add-on |
+| 3.3 | Add-on |
+| 2.93 | Add-on |
+| 2.83 | Add-on |
+
+Blender development moves fast and is known to introduce breaking changes, therefore compatibility with any other version of Blender, including non-LTS releases, is not guaranteed.
 
 ## Installation
 
 ### From GitHub Releases
 
 1. Open the [latest release](https://github.com/OpenKotOR/kotorblender/releases/latest)
-1. When using Blender 4.2, 4.5, or 5.2, download **io_scene_kotor-*version*.zip** and install it from disk as described in the [Blender documentation](https://docs.blender.org/manual/en/4.2/editors/preferences/extensions.html#bpy-ops-extensions-package-install-files)
-1. When using Blender 3.6, download **io_scene_kotor-*version*-blender-3.6.zip** and install it via Edit → Preferences → Add-ons → Install
+1. Download the archive for your Blender version and install it:
+
+| Blender | Archive | Install via |
+|---|---|---|
+| 4.2 and later | **io_scene_kotor-*version*.zip** | Edit → Preferences → Get Extensions → Install from Disk, as described in the [Blender documentation](https://docs.blender.org/manual/en/4.2/editors/preferences/extensions.html#bpy-ops-extensions-package-install-files) |
+| 3.6 and earlier | **io_scene_kotor-*version*-addon.zip** | Edit → Preferences → Add-ons → Install |
 
 ### From Source
 
 1. Clone [GitHub repository](https://github.com/OpenKotOR/kotorblender)
-1. When using Blender 4.2, 4.5, or 5.2, create a symlink to **io_scene_kotor** directory in current user's Blender extensions directory:
-    1. Set cloned repository as current directory
-    1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\5.2\extensions\user_default\io_scene_kotor" "%CD%/io_scene_kotor"` (adjust version number as needed)
-    1. Create a symlink on Linux: `ln -s $(pwd)/io_scene_kotor ~/.config/blender/5.2/extensions/user_default/io_scene_kotor` (adjust version number as needed)
-1. When using Blender 3.6, create a symlink to **io_scene_kotor** directory in current user's Blender addons directory:
-    1. Set cloned repository as current directory
-    1. Create a symlink on Windows: `mklink /D "%APPDATA%\Blender Foundation\Blender\3.6\scripts\addons\io_scene_kotor" "%CD%/io_scene_kotor"`
-    1. Create a symlink on Linux: `ln -s $(pwd)/io_scene_kotor ~/.config/blender/3.6/scripts/addons/io_scene_kotor`
+1. Set cloned repository as current directory
+1. Create a symlink to the **io_scene_kotor** directory in the directory your Blender version reads, adjusting the Blender version number in the path:
+
+| Blender | Symlink on Windows | Symlink on Linux |
+|---|---|---|
+| 4.2 and later | `mklink /D "%APPDATA%\Blender Foundation\Blender\5.2\extensions\user_default\io_scene_kotor" "%CD%/io_scene_kotor"` | `ln -s $(pwd)/io_scene_kotor ~/.config/blender/5.2/extensions/user_default/io_scene_kotor` |
+| 3.6 and earlier | `mklink /D "%APPDATA%\Blender Foundation\Blender\3.6\scripts\addons\io_scene_kotor" "%CD%/io_scene_kotor"` | `ln -s $(pwd)/io_scene_kotor ~/.config/blender/3.6/scripts/addons/io_scene_kotor` |
 
 ### Original Releases
 
