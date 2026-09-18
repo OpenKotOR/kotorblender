@@ -109,10 +109,18 @@ def save_mdl(operator, filepath, options):
     if not mdl_root:
         return
 
-    # Ensure MDL root is selected and is in OBJECT mode
+    # Leave Edit mode while the edited object is still active: mode_set only
+    # switches the active object, and a mesh in Edit mode evaluates to no
+    # geometry, which would export as a node without vertices or faces.
+    prev_active = bpy.context.view_layer.objects.active
+    prev_mode = None
+    if prev_active and prev_active.mode != "OBJECT" and bpy.ops.object.mode_set.poll():
+        prev_mode = prev_active.mode
+        bpy.ops.object.mode_set(mode="OBJECT")
+
+    # Ensure MDL root is selected and active
     mdl_root.select_set(True)
     bpy.context.view_layer.objects.active = mdl_root
-    bpy.ops.object.mode_set(mode="OBJECT")
 
     # Export MDL
     model = Model.from_mdl_root(mdl_root, options)
@@ -157,3 +165,9 @@ def save_mdl(operator, filepath, options):
             operator.report({"INFO"}, "Saving walkmesh to '{}'".format(xwk_path))
             bwm = BwmWriter(xwk_path, walkmesh)
             bwm.save()
+
+    # Put the user back in the mode they were editing in.
+    if prev_mode:
+        bpy.context.view_layer.objects.active = prev_active
+        if bpy.ops.object.mode_set.poll():
+            bpy.ops.object.mode_set(mode=prev_mode)
