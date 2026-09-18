@@ -22,6 +22,7 @@ import bpy
 
 from mathutils import Quaternion, Vector
 
+from .. import compat
 from ..constants import Classification
 from ..utils import find_objects, is_skin_mesh, is_char_bone, is_char_dummy
 
@@ -98,18 +99,9 @@ def apply_object_keyframes(mdl_root, armature):
     action = AnimationNode.get_or_create_action(armature.name)
     if not anim_data.action:
         anim_data.action = action
-    action_slot = None
-    if bpy.app.version >= (4, 4):
-        action_slot = AnimationNode.get_or_create_action_slot(
-            action, "OBJECT", armature.name
-        )
-        if not anim_data.action_slot:
-            anim_data.action_slot = action_slot
-
-    if bpy.app.version >= (4, 4) and action_slot:
-        AnimationNode.ensure_channelbag(action, action_slot).fcurves.clear()
-    else:
-        action.fcurves.clear()
+    action_slot = compat.ensure_action_slot(action, "OBJECT", armature.name)
+    compat.bind_action_slot(anim_data, action_slot)
+    compat.clear_fcurves(action, action_slot)
 
     apply_object_keyframes_to_armature(mdl_root, armature, action, armature_action_slot=action_slot)
     bpy.ops.object.mode_set(mode="OBJECT")
@@ -136,9 +128,7 @@ def apply_object_keyframes_to_armature(
         rest_location = obj.location
         rest_rotation = obj.rotation_quaternion
 
-        action_slot = None
-        if bpy.app.version >= (4, 4) and obj.animation_data.action_slot:
-            action_slot = obj.animation_data.action_slot
+        action_slot = compat.bound_action_slot(obj.animation_data)
 
         keyframes = AnimationNode.get_keyframes(action, action_slot=action_slot)
         nested_keyframes = AnimationNode.nest_keyframes(keyframes)
@@ -224,18 +214,9 @@ def unapply_object_keyframes_from_armature(obj, root_name, armature):
         action = AnimationNode.get_or_create_action("{}.{}".format(root_name, obj.name))
         if not anim_data.action:
             anim_data.action = action
-        action_slot = None
-        if bpy.app.version >= (4, 4):
-            action_slot = AnimationNode.get_or_create_action_slot(
-                action, "OBJECT", obj.name
-            )
-            if not anim_data.action_slot:
-                anim_data.action_slot = action_slot
-
-        if bpy.app.version >= (4, 4) and action_slot:
-            AnimationNode.ensure_channelbag(action, action_slot).fcurves.clear()
-        else:
-            action.fcurves.clear()
+        action_slot = compat.ensure_action_slot(action, "OBJECT", obj.name)
+        compat.bind_action_slot(anim_data, action_slot)
+        compat.clear_fcurves(action, action_slot)
 
         assert bpy.context.scene.frame_current == 0
         rest_location = obj.location.copy()

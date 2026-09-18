@@ -22,6 +22,7 @@ import bpy
 
 from bpy_extras import image_utils
 
+from .. import compat
 from ..constants import UV_MAP_LIGHTMAP, WALKMESH_MATERIALS
 from ..format.tpc.reader import TpcReader
 from ..utils import (
@@ -99,8 +100,7 @@ def rebuild_walkmesh_materials(obj):
         material = get_or_create_material(name)
         material.use_nodes = True
         material.blend_method = "BLEND"
-        if bpy.app.version < (4, 3):
-            material.shadow_method = "NONE"
+        compat.disable_material_shadows(material)
 
         nodes = material.node_tree.nodes
         nodes.clear()

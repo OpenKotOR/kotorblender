@@ -19,9 +19,9 @@
 import sys
 
 import bpy
-from bpy_extras import anim_utils
 from mathutils import Matrix, Quaternion, Vector
 
+from .. import compat
 from ..constants import NodeType, ANIM_REST_POSE_OFFSET
 from ..utils import time_to_frame, frame_to_time, is_close
 
@@ -215,17 +215,9 @@ class AnimationNode:
             action = AnimationNode.get_or_create_action(action_name)
             if not anim_data.action:
                 anim_data.action = action
-            if bpy.app.version >= (4, 4):
-                id_type = (
-                    "LIGHT" if obj.type == "LIGHT" and label == "color" else "OBJECT"
-                )
-                action_slot = AnimationNode.get_or_create_action_slot(
-                    action, id_type, obj.name
-                )
-                if not anim_data.action_slot:
-                    anim_data.action_slot = action_slot
-            else:
-                action_slot = None
+            id_type = "LIGHT" if obj.type == "LIGHT" and label == "color" else "OBJECT"
+            action_slot = compat.ensure_action_slot(action, id_type, obj.name)
+            compat.bind_action_slot(anim_data, action_slot)
 
             data_path = prop.data_path
             fcurves = [
@@ -306,15 +298,6 @@ class AnimationNode:
             return bpy.data.actions.new(name=name)
 
     @classmethod
-    def get_or_create_action_slot(cls, action, id_type, name):
-        # action.slots is keyed by identifier, which prefixes the ID type
-        # ("OBHead_g"), so a lookup by bare name never matches.
-        for slot in action.slots:
-            if slot.name_display == name and slot.target_id_type == id_type:
-                return slot
-        return action.slots.new(id_type=id_type, name=name)
-
-    @classmethod
     def get_or_create_animation_data(cls, subject):
         if subject.animation_data:
             return subject.animation_data
@@ -322,34 +305,12 @@ class AnimationNode:
             return subject.animation_data_create()
 
     @classmethod
-    def ensure_channelbag(cls, action, action_slot):
-        """Return the channelbag holding action_slot's F-curves, creating it if needed.
-
-        Slotted actions exist from Blender 4.4, but the anim_utils helper for
-        this only arrived in 5.0. Earlier versions get the same steps it takes:
-        the first layer, its first keyframe strip, then the slot's channelbag.
-        """
-        if hasattr(anim_utils, "action_ensure_channelbag_for_slot"):
-            return anim_utils.action_ensure_channelbag_for_slot(action, action_slot)
-        layer = action.layers[0] if action.layers else action.layers.new("Layer")
-        strip = layer.strips[0] if layer.strips else layer.strips.new(type="KEYFRAME")
-        return strip.channelbag(action_slot, ensure=True)
-
-    @classmethod
     def get_or_create_fcurve(cls, action, data_path, index, action_slot=None):
-        # From Blender 4.4 an object and its data can share one action in
-        # separate slots, and the legacy Action.fcurves only reaches the first.
-        if bpy.app.version >= (4, 4) and action_slot:
-            channelbag = cls.ensure_channelbag(action, action_slot)
-            fcurve = channelbag.fcurves.find(data_path, index=index)
-            if not fcurve:
-                fcurve = channelbag.fcurves.new(data_path=data_path, index=index)
-            return fcurve
-        else:
-            fcurve = action.fcurves.find(data_path, index=index)
-            if not fcurve:
-                fcurve = action.fcurves.new(data_path=data_path, index=index)
-            return fcurve
+        fcurves = compat.ensure_fcurves(action, action_slot)
+        fcurve = fcurves.find(data_path, index=index)
+        if not fcurve:
+            fcurve = fcurves.new(data_path=data_path, index=index)
+        return fcurve
 
     def load_keyframes_from_object(self, anim, anim_subject):
         anim_data = anim_subject.animation_data
@@ -360,9 +321,7 @@ class AnimationNode:
         if not action:
             return
 
-        action_slot = None
-        if bpy.app.version >= (4, 4) and anim_data.action_slot:
-            action_slot = anim_data.action_slot
+        action_slot = compat.bound_action_slot(anim_data)
 
         keyframes = self.get_keyframes(
             action, anim.frame_start, anim.frame_end, action_slot=action_slot
@@ -412,19 +371,9 @@ class AnimationNode:
         cls, action, frame_start=0, frame_end=sys.maxsize, dp_prefix="", action_slot=None
     ):
         keyframes = dict()
-        if bpy.app.version >= (4, 4) and action_slot:
-            # Read the bound slot only. The legacy Action.fcurves reaches just
-            # the first slot, which may belong to another ID sharing the action.
-            channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
-            if not channelbag:
-                return keyframes
-            fcurves = channelbag.fcurves
-        elif bpy.app.version >= (5, 0):
-            # Blender 5 removed Action.fcurves. An action with no slot bound
-            # to this ID, such as a freshly created one, animates nothing.
+        fcurves = compat.find_fcurves(action, action_slot)
+        if fcurves is None:
             return keyframes
-        else:
-            fcurves = action.fcurves
 
         for fcurve in fcurves:
             data_path = fcurve.data_path

@@ -18,6 +18,7 @@
 
 import bpy
 
+from ... import compat
 from ...constants import NodeType
 
 from .base import BaseNode
@@ -64,9 +65,8 @@ class LightNode(BaseNode):
         light = bpy.data.lights.new(name, "POINT")
         light.color = [(-c if negative else c) for c in self.color]
         light.use_shadow = self.shadow
-        if self.shadow and bpy.app.version < (4, 3):
-            light.use_contact_shadow = True
-            light.contact_shadow_distance = self.radius
+        if self.shadow:
+            compat.set_contact_shadow(light, self.radius)
         return light
 
     def set_object_data(self, obj, options):
