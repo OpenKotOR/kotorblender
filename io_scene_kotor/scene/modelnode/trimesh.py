@@ -74,6 +74,19 @@ class EdgeLoopMesh:
         return len(self.verts)
 
 
+def usable_normal(normal):
+    """Return normal as a tuple, or zeros when it is not a unit vector.
+
+    Blender leaves the normals of degenerate geometry uninitialised, and those
+    values differ between runs. Retail models store a zero normal where they
+    have none to give, and the engine recomputes vertex normals on load. A NaN
+    length fails both comparisons below and is caught the same way.
+    """
+    if not 0.9 < Vector(normal).length < 1.1:
+        return (0.0, 0.0, 0.0)
+    return tuple(normal)
+
+
 class SimilarMdlVertex:
     def __init__(self, coords):
         self.coords = coords
@@ -323,7 +336,7 @@ class TrimeshNode(BaseNode):
         for face in bl_mesh.loop_triangles:
             for i in range(3):
                 mesh.loop_verts.append(face.vertices[i])
-                mesh.loop_normals.append(face.split_normals[i])
+                mesh.loop_normals.append(usable_normal(face.split_normals[i]))
                 loop_idx = face.loops[i]
                 if UV_MAP_MAIN in bl_mesh.uv_layers:
                     mesh.loop_uv1.append(
