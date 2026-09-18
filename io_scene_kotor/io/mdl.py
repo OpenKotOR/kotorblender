@@ -20,6 +20,8 @@ import os
 
 import bpy
 
+from mathutils import Vector
+
 from ..constants import ANIM_FPS
 from ..format.bwm.reader import BwmReader
 from ..format.bwm.writer import BwmWriter
@@ -92,6 +94,46 @@ def load_mdl(operator, filepath, options, position=(0.0, 0.0, 0.0)):
     bpy.context.scene.frame_set(0)
 
 
+def report_degenerate_faces(operator, model):
+    """Report faces too small to have a direction, as one summary.
+
+    Blender stores a custom normal relative to the face it belongs to, so the
+    normals of a zero area face cannot be kept and are exported as zero. The
+    faces are what want fixing, and they are easy to miss in the viewport.
+    Retail area models carry them in numbers, hence the summary.
+    """
+    meshes = []
+    faces_total = 0
+
+    def collect(node):
+        nonlocal faces_total
+        faces = getattr(node, "facelist", None)
+        degenerate = 0
+        for face in faces.vertices if faces else []:
+            verts = [Vector(node.verts[i]) for i in face]
+            if (verts[1] - verts[0]).cross(verts[2] - verts[0]).length < 1e-9:
+                degenerate += 1
+        if degenerate:
+            meshes.append(node.name)
+            faces_total += degenerate
+        for child in node.children:
+            collect(child)
+
+    collect(model.root_node)
+    if not meshes:
+        return
+
+    named = ", ".join(meshes[:3])
+    if len(meshes) > 3:
+        named += " and {} more".format(len(meshes) - 3)
+    operator.report(
+        {"WARNING"},
+        "{} faces with no area in {} ({}); their normals are exported as zero".format(
+            faces_total, "1 mesh" if len(meshes) == 1 else "{} meshes".format(len(meshes)), named
+        ),
+    )
+
+
 def save_mdl(operator, filepath, options):
     # Reset pose
     bpy.context.scene.frame_set(0)
@@ -124,6 +166,7 @@ def save_mdl(operator, filepath, options):
 
     # Export MDL
     model = Model.from_mdl_root(mdl_root, options)
+    report_degenerate_faces(operator, model)
     operator.report({"INFO"}, "Saving model to '{}'".format(filepath))
     mdl = MdlWriter(
         filepath,
