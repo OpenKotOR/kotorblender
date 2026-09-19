@@ -24,6 +24,14 @@ ANIM_REST_POSE_OFFSET = 5
 ANIM_PADDING = 60
 ANIM_FPS = 30
 
+# One row per surfacemat.2da row, in order: a walkmesh face stores its surface
+# as a row index. Names and walk flags are the 2da's, the colours are ours.
+# Rows 20 to 29 are unused placeholders, labelled CRAP in the 2da and named
+# apart here because the lookup below is keyed by name.
+#
+# TSL walks BottomlessPit and KotOR does not. The flag only decides whether a
+# face gets an adjacency record, and the short block is the one a game can read
+# past the end of, so it stays walkable.
 WALKMESH_MATERIALS = [
     ["wok_NotDefined", (0.400, 0.400, 0.400), False],
     ["wok_Dirt", (0.610, 0.235, 0.050), True],
@@ -44,10 +52,18 @@ WALKMESH_MATERIALS = [
     ["wok_BottomlessPit", (0.000, 0.000, 0.000), True],
     ["wok_DeepWater", (0.000, 0.000, 0.216), False],
     ["wok_Door", (0.000, 0.000, 0.000), True],
-    ["wok_Snow", (0.800, 0.800, 0.800), False],
-    ["wok_Sand", (1.000, 1.000, 0.000), True],
-    ["wok_BareBones", (0.500, 0.500, 0.100), True],
-    ["wok_StoneBridge", (0.081, 0.108, 0.139), True],
+    ["wok_NonWalkGrass", (0.800, 0.800, 0.800), False],
+    ["wok_Unused20", (0.400, 0.400, 0.400), False],
+    ["wok_Unused21", (0.400, 0.400, 0.400), False],
+    ["wok_Unused22", (0.400, 0.400, 0.400), False],
+    ["wok_Unused23", (0.400, 0.400, 0.400), False],
+    ["wok_Unused24", (0.400, 0.400, 0.400), False],
+    ["wok_Unused25", (0.400, 0.400, 0.400), False],
+    ["wok_Unused26", (0.400, 0.400, 0.400), False],
+    ["wok_Unused27", (0.400, 0.400, 0.400), False],
+    ["wok_Unused28", (0.400, 0.400, 0.400), False],
+    ["wok_Unused29", (0.400, 0.400, 0.400), False],
+    ["wok_Trigger", (0.000, 0.600, 0.600), True],
 ]
 NAME_TO_WALKMESH_MATERIAL = {mat[0]: mat for mat in WALKMESH_MATERIALS}
 NON_WALKABLE = [mat_idx for mat_idx, mat in enumerate(WALKMESH_MATERIALS) if not mat[2]]
