@@ -16,6 +16,8 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
+import os
+
 from mathutils import Vector
 
 from ...aabb import generate_tree
@@ -43,7 +45,7 @@ class SimilarVertex:
 class BwmWriter:
     def __init__(self, path, walkmesh):
         self.path = path
-        self.bwm = BinaryWriter(path, "little")
+        self.bwm = None
         self.walkmesh = walkmesh
 
         self.bwm_pos = 0
@@ -77,13 +79,25 @@ class BwmWriter:
     def save(self):
         self.peek_walkmesh()
 
-        self.save_header()
-        self.save_vertices()
-        self.save_faces()
-        self.save_aabbs()
-        self.save_adjacent_edges()
-        self.save_outer_edges()
-        self.save_perimeters()
+        # Opening the target truncates it, so a failure partway through would
+        # leave a header promising blocks the file does not hold. The game
+        # reads them anyway.
+        tmp = self.path + ".tmp"
+        self.bwm = BinaryWriter(tmp, "little")
+        try:
+            self.save_header()
+            self.save_vertices()
+            self.save_faces()
+            self.save_aabbs()
+            self.save_adjacent_edges()
+            self.save_outer_edges()
+            self.save_perimeters()
+        except BaseException:
+            self.bwm.close()
+            os.remove(tmp)
+            raise
+        self.bwm.close()
+        os.replace(tmp, self.path)
 
     def peek_walkmesh(self):
         self.bwm_type = (
